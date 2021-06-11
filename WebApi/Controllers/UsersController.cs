@@ -16,6 +16,17 @@ namespace WebApi.Controllers
       _userService = userService;
     }
 
+    [HttpPost("register")]
+    public IActionResult Register(AuthenticateRequest model)
+    {
+      var response = _userService.Authenticate(model);
+
+      if (response == null)
+        return BadRequest(new { message = "Username or password is incorrect" });
+
+      return Ok(response);
+    }
+
     [HttpPost("authenticate")]
     public IActionResult Authenticate(AuthenticateRequest model)
     {
