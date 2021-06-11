@@ -15,47 +15,66 @@ namespace WebApi.Services
   public interface IUserService
   {
     AuthenticateResponse Authenticate(AuthenticateRequest model);
+    (string, User) Register(RegisterRequest model);
     IEnumerable<User> GetAll();
-    User GetById(int id);
+    User GetById(string id);
   }
 
   public class UserService : IUserService
   {
     // users hardcoded for simplicity, store in a db with hashed passwords in production applications
-    private readonly List<User> _users = new()
-    {
-      new User { Id = 1, FirstName = "Test", LastName = "User", Username = "test", Password = "test" }
-    };
+    // private readonly List<User> _users = new()
+    // {
+    //   new User { Id = 1, FirstName = "Test", LastName = "User", Username = "test" }
+    // };
+
+    private readonly WebApiContext _db;
 
     private readonly AppSettings _appSettings;
 
-    public UserService(IOptions<AppSettings> appSettings)
+    public UserService(WebApiContext db, IOptions<AppSettings> appSettings)
     {
+      _db = db;
       _appSettings = appSettings.Value;
     }
 
     public AuthenticateResponse Authenticate(AuthenticateRequest model)
     {
-      var user = _users.SingleOrDefault(x => x.Username == model.Username && x.Password == model.Password);
+      var user = _db.Users.FirstOrDefault(u => u.Username == model.Username);
 
       // return null if user not found
       if (user == null) return null;
 
       // authentication successful so generate jwt token
-      var token = GenerateJwtToken(user);
-
-      return new AuthenticateResponse(user, token);
+      return Hasher.Verify(model.Password, user)
+        ? new AuthenticateResponse(user, GenerateJwtToken(user))
+        : null;
     }
 
-    public IEnumerable<User> GetAll()
+    public (string, User) Register(RegisterRequest model)
     {
-      return _users;
+      var existingUser = _db.Users.SingleOrDefault(u => u.Username == model.Username);
+
+      if (existingUser != null) return ("user already exists", null);
+      if (model.Password1 != model.Password2) return ("passwords don't match", null);
+
+      var (salt, hash) = Hasher.Make(model.Password1);
+      // authentication successful so generate jwt token
+      User u = new(
+        model.FirstName,
+        model.LastName,
+        model.Username,
+        salt,
+        hash
+      );
+      _db.Users.Add(u);
+      _db.SaveChanges();
+      return ($"successfully registered {u.Username}!", u);
     }
 
-    public User GetById(int id)
-    {
-      return _users.FirstOrDefault(x => x.Id == id);
-    }
+    public IEnumerable<User> GetAll() => _db.Users.ToList();
+
+    public User GetById(string id) => _db.Users.FirstOrDefault(u => u.Id == id);
 
     // helper methods
 
@@ -68,7 +87,10 @@ namespace WebApi.Services
       {
         Subject = new ClaimsIdentity(new[] { new Claim("id", user.Id.ToString()) }),
         Expires = DateTime.UtcNow.AddDays(7),
-        SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+        SigningCredentials = new SigningCredentials(
+          new SymmetricSecurityKey(key),
+          SecurityAlgorithms.HmacSha256Signature
+          )
       };
       var token = tokenHandler.CreateToken(tokenDescriptor);
       return tokenHandler.WriteToken(token);

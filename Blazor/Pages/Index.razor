@@ -1,34 +1,33 @@
 ﻿@page "/"
 @attribute [Authorize]
 @inject IUserService UserService
+@inject IAuthenticationService AuthenticationService
 
-<div class="card mt-4">
-  <h4 class="card-header">You're logged in with Blazor WebAssembly & JWT!!</h4>
-  <div class="card-body">
-    <h6>Users from secure api end point</h6>
-    @if (loading)
+<h2>Welcome, @currentUser.FirstName @currentUser.LastName</h2>
+<h6>Users currently logged in:</h6>
+@if (loading)
+{
+  <div class="loading"></div>
+}
+@if (users != null)
+{
+  <ul>
+  @foreach (var user in users)
     {
-      <div class="spinner-border spinner-border-sm"></div>
+      <li>@user.FirstName @user.LastName</li>
     }
-    @if (users != null)
-    {
-      <ul>
-        @foreach (var user in users)
-        {
-          <li>@user.FirstName @user.LastName</li>
-        }
-      </ul>
-    }
-  </div>
-</div>
+  </ul>
+}
 
 @code {
   private bool loading;
   private IEnumerable<User> users;
+  private User currentUser;
 
   protected override async Task OnInitializedAsync()
   {
     loading = true;
+    currentUser = AuthenticationService.User;
     users = await UserService.GetAll();
     loading = false;
   }
