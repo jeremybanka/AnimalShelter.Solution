@@ -7,12 +7,14 @@
 // using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 
 using WebApi.Helpers;
+using WebApi.Models;
 using WebApi.Services;
 
 namespace WebApi
@@ -31,6 +33,8 @@ namespace WebApi
     {
       services.AddCors();
       services.AddControllers();
+      services.AddDbContext<WebApiContext>(options => options
+        .UseMySql(Config["ConnectionStrings:DefaultConnection"], ServerVersion.AutoDetect(Config["ConnectionStrings:DefaultConnection"])));
       // cornflourblue: configure strongly typed settings object
       services.Configure<AppSettings>(Config.GetSection("AppSettings"));
       // cornflourblue: configure DI for application services

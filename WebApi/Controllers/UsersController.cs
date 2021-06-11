@@ -17,12 +17,12 @@ namespace WebApi.Controllers
     }
 
     [HttpPost("register")]
-    public IActionResult Register(AuthenticateRequest model)
+    public IActionResult Register(RegisterRequest model)
     {
-      var response = _userService.Authenticate(model);
+      var response = _userService.Register(model);
+      var (message, user) = response;
 
-      if (response == null)
-        return BadRequest(new { message = "Username or password is incorrect" });
+      if (user == null) return BadRequest(new { message });
 
       return Ok(response);
     }
