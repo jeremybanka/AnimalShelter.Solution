@@ -32,6 +32,13 @@ namespace WebApi
     public void ConfigureServices(IServiceCollection services)
     {
       services.AddCors();
+      services.AddApiVersioning(o =>
+        {
+          o.ReportApiVersions = true;
+          o.AssumeDefaultVersionWhenUnspecified = true;
+          o.DefaultApiVersion = new(0, 0);
+        }
+      );
       services.AddControllers();
       services.AddDbContext<WebApiContext>(options => options
         .UseMySql(Config["ConnectionStrings:DefaultConnection"], ServerVersion.AutoDetect(Config["ConnectionStrings:DefaultConnection"])));
