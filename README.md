@@ -1,14 +1,17 @@
-### SweetSavory.Solution
+### AnimalShelter.Solution
 
 _By Jeremy Banka_
 
 ## Technologies Used
 
 - 🎵 C# / .NET 5 Framework
+- 🔥 Blazor WebAssembly Frontend
+- 🛂 JWT Auth
 - 🎛️ ASP.NET Core Server
 - 👇 Entity Framework Core
+- 🍋 Pomelo MySQL interface
 - 🧮 MySQL Database
-- 🪒 Razor Templating
+- 🏴‍☠️ Swagger API Documentation Framework
 - 💅 SCSS to CSS via Ritwick's Live Sass Compiler
 - 🛠️ Tooling: Omnisharp
 - 🅰️ Font: Palatino by Hermann Zapf (PBUH)
@@ -19,23 +22,37 @@ This is an exercise in implementing user authentication and a simple authorizati
 
 ## Setup/Installation Requirements
 
-- Get the source code: `$ git clone https://github.com/jeremybanka/SweetSavory.Solution`
+- Get the source code: `$ git clone https://github.com/jeremybanka/AnimalShelter.Solution`
 - Set up necessary database schema
   - Install Entity Framework CLI: `$ dotnet tool install --global dotnet-ef`
-  - Build your database: in `SweetSavory/`, run `dotnet ef database update`
-- Add `appsettings.json` in `SweetSavory/` and paste in the following text:
+  - Build your database: in `WebApi/`, run `dotnet ef database update`
+- Add `appsettings.json` in `WebApi/` and paste in the following text:
 
   ```json
   {
+    "AppSettings": {
+      "Secret": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    },
+    "Logging": {
+      "LogLevel": {
+        "Default": "Information",
+        "Microsoft": "Warning",
+        "Microsoft.Hosting.Lifetime": "Information"
+      }
+    },
     "ConnectionStrings": {
-      "DefaultConnection": "Server=localhost;Port=3306;database=sweet_savory;uid=root;pwd=************;"
+      "DefaultConnection": "Server=localhost;Port=3306;database=animal_shelter;uid=root;pwd=************;"
     }
   }
   ```
 
-  except, instead of `************` put your password for MySQL.
+  except, instead of `************` put your personal password for MySQL.
 
-- Compile and run the app as you save changes: `$ dotnet watch run` in `SweetSavory/` (This command will also install necessary dependencies.)
+  and instead of `!!!!!!!!!!!!!!!!!!!!!!!!!!!!!` put a long string. This will be used to create JWT tokens.
+
+- Compile and run the API server as you save changes: `$ dotnet watch run` in `WebApi/` (This command will also install necessary dependencies.) It will also prompt Swagger to open in your browser.
+- Once the server's running, do a `$ dotnet watch run` in `Blazor/`. Again, this will install the dependencies needed.
+- The API server runs on :6144; the client, on :5000. The client's already pointing at the correct port.
 
 ## Known Bugs
 
