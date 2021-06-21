@@ -5,11 +5,13 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using WebApi.Models;
+using WebApi.Helpers;
 
 namespace WebApi.Controllers
 {
-  [ApiVersion("1.0")]
+  //[ApiVersion("1.0")]
   //[Route("api/{v:apiVersion}/")]
+  [Authorize]
   [Route("api/")]
   [ApiController]
   public class PetsController : ControllerBase
@@ -39,11 +41,11 @@ namespace WebApi.Controllers
       _ => NotFound()
     };
     [HttpGet("cats")]
-    public async Task<ActionResult<IEnumerable<Pet>>> GetAllCats(string id)
+    public async Task<ActionResult<IEnumerable<Pet>>> GetAllCats()
     => await GetAllPets("cat");
 
     [HttpGet("dogs")]
-    public async Task<ActionResult<IEnumerable<Pet>>> GetAllDogs(string id)
+    public async Task<ActionResult<IEnumerable<Pet>>> GetAllDogs()
     => await GetAllPets("dog");
 
     [HttpGet("pets/{id}")]
