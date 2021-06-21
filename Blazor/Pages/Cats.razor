@@ -1,0 +1,65 @@
+@page "/cats"
+@attribute [Authorize]
+@using System.ComponentModel.DataAnnotations
+@inject IUserService UserService
+@inject IAuthenticationService AuthenticationService
+@inject NavigationManager NavigationManager
+
+<h2>Cats</h2>
+<section>
+  @if (loading)
+  {
+    <div class="loading"></div>
+  }
+  @if (users != null)
+  {
+    <ul>
+      @foreach (var user in users)
+      {
+        <li>@user.FirstName @user.LastName</li>
+      }
+    </ul>
+  }
+</section>
+
+@code {
+  private Model model = new Model();
+  private bool loading;
+  private IEnumerable<User> users;
+  private User currentUser;
+  private string error;
+
+  protected override async Task OnInitializedAsync()
+  {
+    loading = true;
+    currentUser = AuthenticationService.User;
+    users = await UserService.GetAll();
+    loading = false;
+  }
+
+  private async void HandleValidSubmit()
+  {
+    loading = true;
+    try
+    {
+      await AuthenticationService.Login(model.Username, model.Password);
+      var returnUrl = NavigationManager.QueryString("returnUrl") ?? "";
+      NavigationManager.NavigateTo(returnUrl);
+    }
+    catch (Exception ex)
+    {
+      error = ex.Message;
+      loading = false;
+      StateHasChanged();
+    }
+  }
+
+  private class Model
+  {
+    [Required]
+    public string Username { get; set; }
+
+    [Required]
+    public string Password { get; set; }
+  }
+}

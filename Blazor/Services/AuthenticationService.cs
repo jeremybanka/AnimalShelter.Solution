@@ -8,6 +8,13 @@ namespace Blazor.Services
   {
     User User { get; }
     Task Initialize();
+    Task Register(
+      string firstName,
+      string lastName,
+      string username,
+      string password1,
+      string password2
+      );
     Task Login(string username, string password);
     Task Logout();
   }
@@ -42,6 +49,28 @@ namespace Blazor.Services
         "/users/authenticate",
         new { username, password }
         );
+      await _localStorageService.SetItem("user", User);
+    }
+
+    public async Task Register(
+      string firstName,
+      string lastName,
+      string username,
+      string password1,
+      string password2
+      )
+    {
+      User = await _httpService.Post<User>(
+        "/users/register",
+        new
+        {
+          firstName,
+          lastName,
+          username,
+          password1,
+          password2
+        }
+      );
       await _localStorageService.SetItem("user", User);
     }
 
